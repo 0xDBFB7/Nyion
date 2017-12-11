@@ -1,6 +1,6 @@
 #imports
 from shapely.geometry import Point
-
+import random
 import math
 from decimal import *
 from time import sleep
@@ -19,7 +19,7 @@ data_file = open("data.csv","w+")
 
 #display values
 timestep = 0.000000001
-pixel_size = 5
+pixel_size = 50
 pixel_spacing = 20
 grid_width = 1000
 rotation_x_speed = 0
@@ -30,7 +30,7 @@ rotation_x = 0
 #Physical constants
 k_constant = 8990000000.0
 electron_charge = 0.000000000000016021766
-electron_mass =  0.0000000000000000000000000016726218
+electron_mass = 0.0000000000000000000000000016726218
 aluminum_mass = 0.00000000000000000000000004483263
 
 # getcontext().prec = 50
@@ -38,30 +38,6 @@ aluminum_mass = 0.00000000000000000000000004483263
 
 time = 0
 particles = []
-
-############################################DEFINE THE SIM#########################################
-
-def particle_circle(center=(0, 0, 0), r=0.001, n=20,velocity=132620500):
-    global particles
-    for i in  [
-        (
-            center[0]+(math.cos(2 * math.pi / n * x) * r),  # x
-            center[1] + (math.sin(2 * math.pi / n * x) * r)  # y
-
-        ) for x in xrange(0, n + 1)]:
-        particles.append({"charge": 1.0*electron_charge, "mass": electron_mass, "position": [i[0],center[2],i[1]], "velocity": [0,velocity,0]})
-particle_circle()
-print(particles)
-
-#
-# particles = [{"charge": 1.0*electron_charge, "mass": electron_mass, "position": [10,1,0], "velocity": [0,0,0]},
-#             {"charge": 1.0*electron_charge, "mass": electron_mass, "position": [15,1,0], "velocity": [0,0,0]},
-#             {"charge": 1.0*electron_charge, "mass": electron_mass, "position": [50.3,53,0.3], "velocity": [0,0,0]},
-#             {"charge": 1.0*electron_charge, "mass": electron_mass, "position": [50.4,54,0.4], "velocity": [-100,0,0]}]
-
-
-############################################DEFINE THE SIM#########################################
-
 
 glutInit();
 glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -116,6 +92,41 @@ glutSwapBuffers();
 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+############################################DEFINE THE SIM#########################################
+
+def particle_circle(center=(0, 0, 0), r=0.001, n=20,velocity=132620500):
+    global particles
+    for i in  [
+        (
+            center[0]+(math.cos(2 * math.pi / n * x) * r),  # x
+            center[1] + (math.sin(2 * math.pi / n * x) * r)  # y
+
+        ) for x in xrange(0, n + 1)]:
+        particles.append({"charge": 1.0*electron_charge, "mass": electron_mass, "position": [i[0],center[2],i[1]], "velocity": [0,velocity,0], "fixed": False, "constrain": [[],[],[]],"color":[100,0,0]})
+
+def charged_plate(position=(0.0, -0.0, 0.001), size=(0.1, 0.1, 0.1), n=50, charge=(1/20000000000.0),velocity=1000):
+    global particles
+    for i in range(0,n):
+        particles.append({"charge": charge/n, "mass": electron_mass, "position": [random.uniform(position[0],position[0]+size[0]),random.uniform(position[1],position[1]+size[1]),\
+        random.uniform(position[2],position[2]+size[2])], "velocity": [velocity,velocity,0], "fixed": True,"constrain": [],"color":[100,0,0]})
+
+
+
+particle_circle()
+charged_plate()
+
+print(particles)
+
+#
+# particles = [{"charge": 1.0*electron_charge, "mass": electron_mass, "position": [10,1,0], "velocity": [0,0,0]},
+#             {"charge": 1.0*electron_charge, "mass": electron_mass, "position": [15,1,0], "velocity": [0,0,0]},
+#             {"charge": 1.0*electron_charge, "mass": electron_mass, "position": [50.3,53,0.3], "velocity": [0,0,0]},
+#             {"charge": 1.0*electron_charge, "mass": electron_mass, "position": [50.4,54,0.4], "velocity": [-100,0,0]}]
+
+
+############################################DEFINE THE SIM#########################################
+
+
 while True:
     # glTranslatef(0,0,2000);
     # glRotatef(rotation_y, 0, 0.1, 0);
@@ -127,58 +138,61 @@ while True:
 
     frozen_state = copy.deepcopy(particles)
     for p1_index,particle in enumerate(frozen_state):
-        force_x = 0
-        force_y = 0
-        force_z = 0
+        if not particle["fixed"]:
+            force_x = 0
+            force_y = 0
+            force_z = 0
+            for second_particle in [x for i,x in enumerate(frozen_state) if i!=p1_index]:
+                magnitude = (k_constant*particle['charge']*second_particle['charge']);
+                distance_x = (particle["position"][0]-second_particle["position"][0])
+                distance_y = (particle["position"][1]-second_particle["position"][1])
+                distance_z = (particle["position"][2]-second_particle["position"][2])
+                distance = math.sqrt(distance_x**2.0+distance_y**2.0+distance_z**2.0)
+                e_force = (magnitude/((distance)**2.0));
 
-        for second_particle in [x for i,x in enumerate(frozen_state) if i!=p1_index]:
-            magnitude = (k_constant*particle['charge']*second_particle['charge']);
-            distance_x = (particle["position"][0]-second_particle["position"][0])
-            distance_y = (particle["position"][1]-second_particle["position"][1])
-            distance_z = (particle["position"][2]-second_particle["position"][2])
-            distance = math.sqrt(distance_x**2.0+distance_y**2.0+distance_z**2.0)
-            e_force = (magnitude/((distance)**2.0));
+                force_x += e_force*(distance_x/distance)
+                force_y += e_force*(distance_y/distance)
+                force_z += e_force*(distance_z/distance)
+                print("Distance: {}".format(math.sqrt(distance_x**2.0+distance_y**2.0+distance_z**2.0)))
 
-            force_x += e_force*(distance_x/distance)
-            force_y += e_force*(distance_y/distance)
-            force_z += e_force*(distance_z/distance)
-            print("Distance: {}".format(math.sqrt(distance_x**2.0+distance_y**2.0+distance_z**2.0)))
-
-            # try:
-            #     force_x += vector(distance_x)*(magnitude/((distance_x)**2.0)); #if the distance is zero...you get the point.
-            # except:
-            #     force_x += 0
-            #
-            # try:
-            #     force_y += vector(distance_y)*(magnitude/((distance_y)**2.0));
-            # except:
-            #     force_y += 0
-            #
-            # try:
-            #     force_z += vector(distance_z)*(magnitude/((distance_z)**2.0));
-            # except:
-            #     force_z += 0
+                # try:
+                #     force_x += vector(distance_x)*(magnitude/((distance_x)**2.0)); #if the distance is zero...you get the point.
+                # except:
+                #     force_x += 0
+                #
+                # try:
+                #     force_y += vector(distance_y)*(magnitude/((distance_y)**2.0));
+                # except:
+                #     force_y += 0
+                #
+                # try:
+                #     force_z += vector(distance_z)*(magnitude/((distance_z)**2.0));
+                # except:
+                #     force_z += 0
 
 
 
-        accel_x = force_x/particle['mass']
-        accel_y = force_y/particle['mass']
-        accel_z = force_z/particle['mass']
+            accel_x = force_x/particle['mass']
+            accel_y = force_y/particle['mass']
+            accel_z = force_z/particle['mass']
 
-        particles[p1_index]["velocity"][0] += accel_x*timestep;
-        particles[p1_index]["velocity"][1] += accel_y*timestep;
-        particles[p1_index]["velocity"][2] += accel_z*timestep;
+            particles[p1_index]["velocity"][0] += accel_x*timestep;
+            particles[p1_index]["velocity"][1] += accel_y*timestep;
+            particles[p1_index]["velocity"][2] += accel_z*timestep;
 
-        particles[p1_index]["position"][0] += particles[p1_index]["velocity"][0]*timestep
-        particles[p1_index]["position"][1] += particles[p1_index]["velocity"][1]*timestep
-        particles[p1_index]["position"][2] += particles[p1_index]["velocity"][2]*timestep
-        print("-"*20)
-        print("Particle: {} X: {} Y: {} Z: {}".format(p1_index,frozen_state[p1_index]["position"][0],frozen_state[p1_index]["position"][1],frozen_state[p1_index]["position"][2]))
-        print("Velocity: X: {} Y: {} Z: {}".format(particles[p1_index]["velocity"][0],particles[p1_index]["velocity"][1],particles[p1_index]["velocity"][2]))
-        print("Acceleration: X: {} Y: {} Z: {}".format(accel_x,accel_y,accel_z))
-        print("Force: X: {} Y: {} Z: {}".format(force_x,force_y,force_z))
-        # data_file.write("{},{},{},{},{},{},{},{},{},{},\n".format(particles[p1_index]["position"][0],particles[p1_index]["position"][1],particles[p1_index]["position"][2]))
-        print("-"*20)
+            particles[p1_index]["position"][0] += particles[p1_index]["velocity"][0]*timestep
+            particles[p1_index]["position"][1] += particles[p1_index]["velocity"][1]*timestep
+            particles[p1_index]["position"][2] += particles[p1_index]["velocity"][2]*timestep
+
+
+
+            print("-"*20)
+            print("Particle: {} X: {} Y: {} Z: {}".format(p1_index,frozen_state[p1_index]["position"][0],frozen_state[p1_index]["position"][1],frozen_state[p1_index]["position"][2]))
+            print("Velocity: X: {} Y: {} Z: {}".format(particles[p1_index]["velocity"][0],particles[p1_index]["velocity"][1],particles[p1_index]["velocity"][2]))
+            print("Acceleration: X: {} Y: {} Z: {}".format(accel_x,accel_y,accel_z))
+            print("Force: X: {} Y: {} Z: {}".format(force_x,force_y,force_z))
+            # data_file.write("{},{},{},{},{},{},{},{},{},{},\n".format(particles[p1_index]["position"][0],particles[p1_index]["position"][1],particles[p1_index]["position"][2]))
+            print("-"*20)
         draw_sphere(particles[p1_index]["position"][0]*pixel_spacing,particles[p1_index]["position"][1]*pixel_spacing,particles[p1_index]["position"][2]*pixel_spacing,[0,0,0])
 
     print("Frame complete")
