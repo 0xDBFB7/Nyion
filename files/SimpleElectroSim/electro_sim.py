@@ -1,5 +1,6 @@
 #imports
 from shapely.geometry import Point
+import numpy as np
 import random
 import math
 from decimal import *
@@ -11,7 +12,7 @@ try:
     from OpenGL.GLUT import *
 except:
     print "OpenGL wrapper for python not found"
-
+from stl import mesh
 
 #The grid is m^2. Force is in newtons. Charge is Coloumbs.
 
@@ -19,7 +20,7 @@ data_file = open("data.csv","w+")
 
 #display values
 timestep = 0.000000001
-pixel_size = 50
+pixel_size = 10
 pixel_spacing = 20
 grid_width = 1000
 rotation_x_speed = 0
@@ -64,7 +65,7 @@ glLoadIdentity();
 glTranslatef(0,0,0);
 glRotatef(0, 45, 0.1, 0);
 glRotatef(0, 0, 45, 0);
-glTranslatef(-grid_width/2,-grid_width/2, -3000);
+glTranslatef(-grid_width/2,-grid_width/2, -1500);
 
 def vector(a):
     if(a > 0):
@@ -94,7 +95,7 @@ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 ############################################DEFINE THE SIM#########################################
 
-def particle_circle(center=(0, 0, 0), r=0.001, n=20,velocity=132620500):
+def particle_circle(center=(0, 0, 0), r=1, n=10,velocity=132620500, fixed=False):
     global particles
     for i in  [
         (
@@ -102,20 +103,41 @@ def particle_circle(center=(0, 0, 0), r=0.001, n=20,velocity=132620500):
             center[1] + (math.sin(2 * math.pi / n * x) * r)  # y
 
         ) for x in xrange(0, n + 1)]:
-        particles.append({"charge": 1.0*electron_charge, "mass": electron_mass, "position": [i[0],center[2],i[1]], "velocity": [0,velocity,0], "fixed": False, "constrain": [[],[],[]],"color":[100,0,0]})
+        particles.append({"charge": 1.0*electron_charge, "mass": electron_mass, "position": [i[0],center[2],i[1]], "velocity": [0,velocity,0], "constrain": [[],[],[]],"color":[0,0,0], "fixed": fixed})
 
-def charged_plate(position=(0.0, -0.0, 0.001), size=(0.1, 0.1, 0.1), n=50, charge=(1/20000000000.0),velocity=1000):
+# def charged_plate(position=(5.0, 10, 0.001), size=(2,5,5), n=50, charge=(1/2000000.0),velocity=1000):
+#     global particles
+#     for i in range(0,n):
+#         particles.append({"charge": charge/n, "mass": electron_mass, "position": [random.uniform(position[0],position[0]+size[0]),random.uniform(position[1],position[1]+size[1]),\
+#         random.uniform(position[2],position[2]+size[2])], "velocity": [velocity,velocity,0], "fixed": True,"constrain": [],"color":[100,0,0]})
+#
+# def charged_plate_with_hole(position=(5.0, 10, 0.001), size=(2,5,5), n=50, charge=(1/2000000.0),velocity=1000):
+#     global particles
+#     for i in range(0,n):
+#         particles.append({"charge": charge/n, "mass": electron_mass, "position": [random.uniform(position[0],position[0]+size[0]),random.uniform(position[1],position[1]+size[1]),\
+#         random.uniform(position[2],position[2]+size[2])], "velocity": [velocity,velocity,0], "fixed": True,"constrain": [],"color":[100,0,0]})
+
+anode = mesh.Mesh.from_file('anode.stl')
+
+def charged_mesh(input_mesh, charge=(1/2000000.0), n=50,velocity=1000):
     global particles
-    for i in range(0,n):
-        particles.append({"charge": charge/n, "mass": electron_mass, "position": [random.uniform(position[0],position[0]+size[0]),random.uniform(position[1],position[1]+size[1]),\
-        random.uniform(position[2],position[2]+size[2])], "velocity": [velocity,velocity,0], "fixed": True,"constrain": [],"color":[100,0,0]})
+    prev_point = input_mesh.points[0]
+    print(len(input_mesh.points))
+    for point in input_mesh.points:
+        for i in np.arange(0,point[0],n/len(input_mesh.points)):
+            particles.append({"charge": charge/n, "mass": electron_mass, "position": [point[0]-prev_point[0],point[1],point[2]], "velocity": [velocity,velocity,0], "fixed": True,"constrain": [],"color":[100,0,0]})
+        prev_point = point
 
+particle_circle(velocity=0)
+charged_mesh(anode)
 
+for i in np.arange(30,50):
+    particle_circle(center=(0,0,i), r=10,fixed=True)
 
-particle_circle()
-charged_plate()
+# charged_plate()
 
 print(particles)
+sleep(1)
 
 #
 # particles = [{"charge": 1.0*electron_charge, "mass": electron_mass, "position": [10,1,0], "velocity": [0,0,0]},
@@ -132,7 +154,7 @@ while True:
     # glRotatef(rotation_y, 0, 0.1, 0);
     # glRotatef(45, 0.1, 0, 0);
     # glTranslatef(-grid_width/2,-grid_width/2, -2000);
-    # glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     rotation_y = rotation_y_speed*time
     print("Time: {}".format(time))
 
@@ -193,7 +215,7 @@ while True:
             print("Force: X: {} Y: {} Z: {}".format(force_x,force_y,force_z))
             # data_file.write("{},{},{},{},{},{},{},{},{},{},\n".format(particles[p1_index]["position"][0],particles[p1_index]["position"][1],particles[p1_index]["position"][2]))
             print("-"*20)
-        draw_sphere(particles[p1_index]["position"][0]*pixel_spacing,particles[p1_index]["position"][1]*pixel_spacing,particles[p1_index]["position"][2]*pixel_spacing,[0,0,0])
+        draw_sphere(particles[p1_index]["position"][0]*pixel_spacing,particles[p1_index]["position"][1]*pixel_spacing,particles[p1_index]["position"][2]*pixel_spacing,particles[p1_index]["color"])
 
     print("Frame complete")
     print("#"*20)
