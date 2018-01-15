@@ -6,6 +6,7 @@ import math
 from decimal import *
 from time import sleep
 import copy
+from plugins.trisurface import TriSurface
 try:
     from OpenGL.GL import *
     from OpenGL.GLU import *
@@ -119,12 +120,16 @@ def particle_circle(center=(0, 0, 0), r=1, n=10,velocity=132620500, fixed=False)
 
 anode = mesh.Mesh.from_file('anode.stl')
 
-def charged_mesh(input_mesh, charge=(1/2000000.0), n=50,velocity=1000):
+print(trisurface.read_stl('anode.stl'))
+
+
+def charged_mesh(input_mesh, charge=(1/2000000.0), n=100,velocity=1000):
     global particles
     prev_point = input_mesh.points[0]
     print(len(input_mesh.points))
+    print(input_mesh.points.flatten(-1))
     for point in input_mesh.points:
-        for i in np.arange(0,point[0],n/len(input_mesh.points)):
+        for i in np.arange(point[0],point[1],n/len(input_mesh.points)):
             particles.append({"charge": charge/n, "mass": electron_mass, "position": [point[0]-prev_point[0],point[1],point[2]], "velocity": [velocity,velocity,0], "fixed": True,"constrain": [],"color":[100,0,0]})
         prev_point = point
 
@@ -137,7 +142,7 @@ for i in np.arange(30,50):
 # charged_plate()
 
 print(particles)
-sleep(1)
+sleep(3)
 
 #
 # particles = [{"charge": 1.0*electron_charge, "mass": electron_mass, "position": [10,1,0], "velocity": [0,0,0]},
