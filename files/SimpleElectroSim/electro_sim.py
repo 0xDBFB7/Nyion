@@ -19,7 +19,7 @@ from stl import mesh
 data_file = open("data.csv","w+")
 
 #display values
-timestep = 0.000000001
+timestep = 0.0000001
 pixel_size = 10
 pixel_spacing = 20
 grid_width = 1000
@@ -33,9 +33,6 @@ k_constant = 8990000000.0
 electron_charge = 0.000000000000016021766
 electron_mass = 0.0000000000000000000000000016726218
 aluminum_mass = 0.00000000000000000000000004483263
-
-# getcontext().prec = 50
-# num = Decimal(100000000000000000000000000000000000000000000000.22222222222222222222222222226415132151515156165165)
 
 time = 0
 particles = []
@@ -65,7 +62,7 @@ glLoadIdentity();
 glTranslatef(0,0,0);
 glRotatef(0, 45, 0.1, 0);
 glRotatef(0, 0, 45, 0);
-glTranslatef(-grid_width/2,-grid_width/2, -1500);
+glTranslatef(-grid_width/2,-grid_width/2, -2000);
 
 def vector(a):
     if(a > 0):
@@ -93,9 +90,12 @@ glutSwapBuffers();
 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+
+
+
 ############################################DEFINE THE SIM#########################################
 
-def particle_circle(center=(0, 0, 0), r=1, n=10,velocity=132620500, fixed=False):
+def particle_circle(center=(0, 0, 0), charge=electron_charge,r=1, n=10,velocity=132620500, fixed=False):
     global particles
     for i in  [
         (
@@ -103,38 +103,42 @@ def particle_circle(center=(0, 0, 0), r=1, n=10,velocity=132620500, fixed=False)
             center[1] + (math.sin(2 * math.pi / n * x) * r)  # y
 
         ) for x in xrange(0, n + 1)]:
-        particles.append({"charge": 1.0*electron_charge, "mass": electron_mass, "position": [i[0],center[2],i[1]], "velocity": [0,velocity,0], "constrain": [[],[],[]],"color":[0,0,0], "fixed": fixed})
+        particles.append({"charge": 1.0*charge, "mass": electron_mass, "position": [i[0],center[2],i[1]], "velocity": [0,velocity,0], "constrain": [[],[],[]],"color":[0,0,0], "fixed": fixed})
 
-# def charged_plate(position=(5.0, 10, 0.001), size=(2,5,5), n=50, charge=(1/2000000.0),velocity=1000):
-#     global particles
-#     for i in range(0,n):
-#         particles.append({"charge": charge/n, "mass": electron_mass, "position": [random.uniform(position[0],position[0]+size[0]),random.uniform(position[1],position[1]+size[1]),\
-#         random.uniform(position[2],position[2]+size[2])], "velocity": [velocity,velocity,0], "fixed": True,"constrain": [],"color":[100,0,0]})
-#
-# def charged_plate_with_hole(position=(5.0, 10, 0.001), size=(2,5,5), n=50, charge=(1/2000000.0),velocity=1000):
-#     global particles
-#     for i in range(0,n):
-#         particles.append({"charge": charge/n, "mass": electron_mass, "position": [random.uniform(position[0],position[0]+size[0]),random.uniform(position[1],position[1]+size[1]),\
-#         random.uniform(position[2],position[2]+size[2])], "velocity": [velocity,velocity,0], "fixed": True,"constrain": [],"color":[100,0,0]})
-
-anode = mesh.Mesh.from_file('anode.stl')
-
-def charged_mesh(input_mesh, charge=(1/2000000.0), n=0,velocity=1000):
+def charged_plate(position=(5.0, 10, 0.001), size=(2,5,5), n=50, charge=(1/2000000.0),velocity=1000):
     global particles
-    prev_point = input_mesh.points[0]
-    print(len(input_mesh.points))
-    print(input_mesh.points.flatten(-1))
-    for point in input_mesh.points:
-        for i in np.arange(0,point[0],n/len(input_mesh.points)):
-            particles.append({"charge": charge/n, "mass": electron_mass, "position": [point[0]-prev_point[0],point[1],point[2]], "velocity": [velocity,velocity,0], "fixed": True,"constrain": [],"color":[100,0,0]})
-        prev_point = point
+    for i in range(0,n):
+        particles.append({"charge": charge/n, "mass": electron_mass, "position": [random.uniform(position[0],position[0]+size[0]),random.uniform(position[1],position[1]+size[1]),\
+        random.uniform(position[2],position[2]+size[2])], "velocity": [velocity,velocity,0], "fixed": True,"constrain": [],"color":[100,0,0]})
 
-particle_circle(velocity=0)
-charged_mesh(anode)
+def charged_plate_with_hole(position=(5.0, 10, 0.001), size=(2,5,5), n=50, charge=(1/2000000.0),velocity=1000):
+    global particles
+    for i in range(0,n):
+        particles.append({"charge": charge/n, "mass": electron_mass, "position": [random.uniform(position[0],position[0]+size[0]),random.uniform(position[1],position[1]+size[1]),\
+        random.uniform(position[2],position[2]+size[2])], "velocity": [velocity,velocity,0], "fixed": True,"constrain": [],"color":[100,0,0]})
 
-for i in np.arange(30,50):
-    particle_circle(center=(0,0,i), r=10,fixed=True)
+# anode = mesh.Mesh.from_file('anode.stl')
+#
+# def charged_mesh(input_mesh, charge=(1/2000000.0), n=0,velocity=1000):
+#     global particles
+#     prev_point = input_mesh.points[0]
+#     print(len(input_mesh.points))
+#     print(input_mesh.points.flatten(-1))
+#     for point in input_mesh.points:
+#         for i in np.arange(0,point[0],n/len(input_mesh.points)):
+#             particles.append({"charge": charge/n, "mass": electron_mass, "position": [point[0]-prev_point[0],point[1],point[2]], "velocity": [velocity,velocity,0], "fixed": True,"constrain": [],"color":[100,0,0]})
+#         prev_point = point
 
+particle_circle(velocity=1326000)
+particle_circle(r=5,velocity=1326000)
+# charged_mesh(anode)
+
+for i in np.arange(10,30):
+    particle_circle(center=(0,0,i), r=10,fixed=True,charge=electron_charge)
+for i in np.arange(40,60):
+    particle_circle(center=(0,0,i), r=10,fixed=True,charge=-electron_charge)
+for i in np.arange(70,90):
+    particle_circle(center=(0,0,i), r=10,fixed=True,charge=electron_charge)
 # charged_plate()
 
 print(particles)
@@ -148,6 +152,8 @@ sleep(3)
 
 
 ############################################DEFINE THE SIM#########################################
+
+
 
 
 while True:
@@ -177,22 +183,6 @@ while True:
                 force_y += e_force*(distance_y/distance)
                 force_z += e_force*(distance_z/distance)
                 print("Distance: {}".format(math.sqrt(distance_x**2.0+distance_y**2.0+distance_z**2.0)))
-
-                # try:
-                #     force_x += vector(distance_x)*(magnitude/((distance_x)**2.0)); #if the distance is zero...you get the point.
-                # except:
-                #     force_x += 0
-                #
-                # try:
-                #     force_y += vector(distance_y)*(magnitude/((distance_y)**2.0));
-                # except:
-                #     force_y += 0
-                #
-                # try:
-                #     force_z += vector(distance_z)*(magnitude/((distance_z)**2.0));
-                # except:
-                #     force_z += 0
-
 
 
             accel_x = force_x/particle['mass']
