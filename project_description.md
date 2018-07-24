@@ -11,11 +11,9 @@ Status: Completed
 Background:
 ---
 
-Wanted to simulate constructive/destructive interferance patterns, in the theme of falstad. 
 
 
 
 Description:
 ---
 
-Written in c, requires glut or glew or something.
