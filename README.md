@@ -1,5 +1,5 @@
-##I was unaware of the existence of IBSimu when I began writing this program, and have since abandoned this.
-##IBSimu can do everything I ever dreamed of adding to this program. It's awesome.
+I was unaware of the existence of IBSimu when I began writing this program, and have since abandoned this.
+IBSimu can do everything I ever dreamed of adding to this program. It's awesome.
 
 -----`~/^-^/------->
 
