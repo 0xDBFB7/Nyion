@@ -4,7 +4,7 @@
 
 Nyion. A block-structured mesh ion optics program - made of Nyan cat.
 
-Because electrons are so fast compared to ions, to resolve both over long durations without resorting to slow-electron simulations (like [Vsim]), Particle in Cell / DSMC sims must solve grids very rapidly and efficiently. 
+Because, given the same energy, electrons super fast compared to ions, to resolve both over long durations without resorting to slow-electron simulations (like [Vsim]), Particle in Cell / DSMC sims must solve grids very rapidly and efficiently. 
 At least for simple relaxation-based solvers (not BiCGSTAB, for instance), the main limitation on performance seems to be the node-efficiency of the data structure used to represent the physical mesh.
 
 ```
