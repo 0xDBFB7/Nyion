@@ -1,6 +1,5 @@
 build
-*.png
 *.svg
-*.png
 !data_structure_chart/data_structure_chart.png
+
 *.out

@@ -12,9 +12,9 @@ This is a test implementation of a very fast (something like 19 ms per mesh) blo
 This specific form of the block-structured mesh data structure seems to be pretty cool for geometric multigrid electrostatic solvers, because the hierarchical geometry of the mesh corresponds well to multigrid requirements.
  Depth- and breadth- traversals are easy to code; ghost cells can be handled separately; and updates "at the edges" of a block are handled seamlessly.
 
-
-
 Ultimately, a little more knowledge of Vlasov equations or even basic linear algebra would probably have been better than spending time on this, but there you go.
 
+![](images/array_helper.png)
+![](images/array_helper_2.png)
 
-
+There are also a few tests of GCC's new GPU offloading (no significant benefit for these problem sizes).
