@@ -35,6 +35,8 @@ For an introduction to the multigrid methods used here, I highly recommend the b
 Briggs WL, McCormick SF, others. A multigrid tutorial. Siam; 2000.
 ```
 
+For all references, see the file references.bib in the associated ion_printer repo.
+
 There are also a few tests of GCC's new GPU offloading (no significant benefit for these problem sizes).
 
 # <3     
