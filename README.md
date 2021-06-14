@@ -20,7 +20,7 @@ This specific form of block-structured mesh data structure seems to be pretty co
 
 ![](data_structure_chart/data_structure_chart.png)
 
-Ultimately, a little more knowledge of Vlasov equations or even basic linear algebra would probably have been better than spending time on this, but there you go.
+Ultimately, a little more knowledge of Vlasov equations or even basic linear algebra would probably have been better than spending time on this, but there you go. There are almost certainly better ways of doing this (wavelet methods!), this is primarily a reflection of my inexperience with advanced techniques.
 
 One thing that might be generally helpful: coding "mesh stencils" (and other operations) on complex data-structures in low-level code is pretty tricky to get right, and it's hard to write tests for array indexes you can't visually see. To help with this, there's a little TUI and OpenGL tool that helps visualize array indices.
 
